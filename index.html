@@ -46,17 +46,17 @@
 
   <h3>Good Data Visualization Example</h3>
   <p>
-    One data visualization I find particularly helpful is 
+    One data visualization I find particularly helpful is
     <a href="https://www.maharam.com/stories/sherlock_florence-nightingales-rose-diagram">
       Florence Nightingale's Rose Chart.
     </a>
   </p>
   <p>
-    I really like how simple it is to visualize the comparison between different attributes 
+    I really like how simple it is to visualize the comparison between different attributes
     in this type of chart. Instead of comparing things side by side, overlaying them in this
-    fashion makes it very easy to see the difference, in this case, between causes of death, 
-    per each month. This type of chart is often used in sports analysis now, because 
-    it makes comparing different attributes very simple and all together without making the 
+    fashion makes it very easy to see the difference, in this case, between causes of death,
+    per each month. This type of chart is often used in sports analysis now, because
+    it makes comparing different attributes very simple and all together without making the
     eyes have to wander around.
   </p>
 
@@ -73,12 +73,111 @@
   <p>
     Upon first looking at this chart, a viewer might believe that the right bar shows a halving from the
     left. However, the y-axis is truncated. A bar chart should also begin the y-axis at 0, to maintain
-    proper scale. Starting this chart at 58% means that the difference on the top end is visually 
-    exaggerated, and can seriously mislead viewers into believing a change between the two data points 
-    is much larger than in reality. 
+    proper scale. Starting this chart at 58% means that the difference on the top end is visually
+    exaggerated, and can seriously mislead viewers into believing a change between the two data points
+    is much larger than in reality.
   </p>
 
   <hr>
+
+  <h3>Assignment 3: D3</h3>
+
+  <br></br>
+
+  <h4>Frequency of Letters in "Alex"</h4>
+
+  <div id="chart-container"></div>
+
+  <!-- Include D3.js library -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+
+  <!-- Your D3.js code goes here -->
+  <script>
+    // Your D3.js code
+    function createBarChart(data) {
+      // Declare the chart dimensions and margins.
+      const width = 928;
+      const height = 500;
+      const marginTop = 30;
+      const marginRight = 0;
+      const marginBottom = 30;
+      const marginLeft = 40;
+
+      // Declare the x (horizontal position) scale.
+      const x = d3.scaleBand()
+        .domain(d3.groupSort(data, ([d]) => -d.frequency, (d) => d.letter)) // descending frequency
+        .range([marginLeft, width - marginRight])
+        .padding(0.1);
+
+      // Declare the y (vertical position) scale.
+      const y = d3.scaleLinear()
+        .domain([0, d3.max(data, (d) => d.frequency)])
+        .range([height - marginBottom, marginTop]);
+
+      // Create the SVG container.
+      const svg = d3.create("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("viewBox", [0, 0, width, height])
+        .attr("style", "max-width: 100%; height: auto;");
+
+      // Add a rect for each bar.
+      svg.append("g")
+        .attr("fill", "steelblue")
+        .selectAll()
+        .data(data)
+        .join("g")
+        .attr("transform", (d) => `translate(${x(d.letter)},0)`)
+        .call((g) =>
+          g.append("rect")
+            .attr("y", (d) => y(d.frequency))
+            .attr("height", (d) => y(0) - y(d.frequency))
+            .attr("width", x.bandwidth())
+        )
+        .call((g) =>
+          g.append("text")
+            .attr("x", (d) => x.bandwidth() / 2)
+            .attr("y", (d) => y(d.frequency) - 10) // Adjust the position of labels (e.g., -5 for above bars)
+            .attr("text-anchor", "middle")
+            .attr("dy", "0.35em") // Vertical alignment
+            .text((d) => d.frequency.toFixed(4)) // Display the frequency as text
+        );
+
+      // Add the x-axis and label.
+      svg.append("g")
+        .attr("transform", `translate(0,${height - marginBottom})`)
+        .call(d3.axisBottom(x).tickSizeOuter(0));
+
+      // Add the y-axis and label, and remove the domain line.
+      svg.append("g")
+        .attr("transform", `translate(${marginLeft},0)`)
+        .call(d3.axisLeft(y).tickFormat((y) => (y * 100).toFixed()))
+        .call(g => g.select(".domain").remove())
+        .call(g => g.append("text")
+          .attr("x", -marginLeft)
+          .attr("y", 10)
+          .attr("fill", "currentColor")
+          .attr("text-anchor", "start")
+          .text("↑ Frequency (%)"));
+
+      // Return the SVG element.
+      return svg.node();
+    }
+
+    // Define your data
+    const data = [
+      { letter: "A", frequency: 0.0820 },
+      { letter: "L", frequency: 0.0730 },
+      { letter: "E", frequency: 0.1160 },
+      { letter: "X", frequency: 0.0010 }
+    ];
+
+    // Call the createBarChart function with your data
+    const chart = createBarChart(data);
+
+    // Append the chart to the container
+    document.getElementById("chart-container").appendChild(chart);
+  </script>
 
 </body>
 
